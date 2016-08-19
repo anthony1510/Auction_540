@@ -471,8 +471,15 @@ class Magestore_Auction_IndexController extends Mage_Core_Controller_Front_Actio
         $data['customer_name'] = $customer->getName();
         $data['customer_email'] = $customer->getEmail();
         $store_id = Mage::app()->getStore()->getId();
-
-        //prepare bidder name
+		
+		//check customer send deposit
+		if (!Mage::helper('auction')->checkDeposit($data['productauction_id'],  $data['customer_id'])) {
+            $result .= $notice->getNoticeError($_helper->__('You must be wait admin approve.'));
+            $this->getResponse()->setBody($result);
+            return;
+        }
+		
+		//prepare bidder name
         if ($bidderNameType == '1') {
             $data['bidder_name'] = $_helper->encodeBidderName($auction, $customer);
         } else {
