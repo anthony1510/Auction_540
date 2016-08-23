@@ -6,6 +6,7 @@
         <?php $product = $this->getProduct() ?>
         <?php $form_url = $this->getBidUrl() ?>
         <div class="divider"></div>
+        <?php if ($auction->getStatus() != 3) : ?>
         <div id="auction">
             <?php if ($auction->getStatus() == 4) : ?>
                 <h4><?php echo $this->__('Auction ends in: ') ?> <span id="auction_timeleft" class="auction_timeleft"> </span></h4>	
@@ -73,7 +74,7 @@
                         </div>
                         <?php else:?>
                             <div class="row">
-                                <?php echo $this->__('You must pay deposit to parative auction (check out product deposit to by deposit)') ?>
+                                <?php echo $this->__('You must pay deposit to participate auction (check out product deposit to by deposit)') ?>
                             </div>
                             <div class="row" style="height: 35px;">
                                 <a class="button" id="auction_checkout_deposit_button" type="button" onmouseover="overDepositButton(this);" onmouseout="outDepositButton(this);"  href="<?php echo Mage::getBaseUrl().'auction/index/checkoutdeposit/id/'.$auction->getProductauctionId()?>" >
@@ -217,18 +218,6 @@
                             button.down('span').innerHTML = '<?php echo $this->__('Login') ?>';
                             <?php endif; ?>
                             return;
-                            <?php elseif ($this->requiredBidderName()) : ?>
-                            <?php $imgSrc = $_helper->getCreateBidNameButtonImage() ?>
-                            <?php if ($imgSrc): ?>
-                            button.down('img').src = "<?php echo $imgSrc; ?>";
-                            button.removeClassName('button');
-                            button.addClassName('image-button');
-                            <?php else: ?>
-                            button.addClassName('button');
-                            button.removeClassName('image-button');
-                            button.down('span').innerHTML = '<?php echo $this->__('Create Bidder Name') ?>';
-                            <?php endif; ?>
-                            return;
                             <?php endif; ?>
                         }
 
@@ -320,6 +309,7 @@
                     </script>
                 </div>
             <?php else : ?>
+
                 <h4><?php echo $this->__('Completed Auction') ?></h4>
                 <?php if ($this->isWinner()): ?>
                     <div class="won-message">
@@ -342,8 +332,10 @@
                         <?php echo $this->getChildHtml('auction_info') ?>
                     </div>	
                 </div>
+
             <?php endif; ?>		
         </div>
+        <?php endif; ?>
         <style type="text/css">	
         <?php echo Mage::getStoreConfig('auction/design/css') ?>
         </style>
