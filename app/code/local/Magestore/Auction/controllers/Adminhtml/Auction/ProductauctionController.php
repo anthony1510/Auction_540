@@ -547,10 +547,14 @@ class Magestore_Auction_Adminhtml_Auction_ProductauctionController extends Mage_
 			 $this->_getSession()->addSuccess(
 			 $this->__('Total of %d record(s) were successfully updated', count($Ids))
 			 );
+             
 		 } catch (Exception $e) {
 		 $this->_getSession()->addError($e->getMessage());
 		 }
 	 }
+	     $model = Mage::getModel('auction/deposit')
+		        ->load($this->getRequest()->getParam('id'));
+	     $model->->emailApproveToCustomer();
 	 $this->_redirect('*/*/edit', array('id' => $product_id)
             );
 	}
