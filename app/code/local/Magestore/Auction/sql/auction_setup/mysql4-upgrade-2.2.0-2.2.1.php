@@ -48,6 +48,25 @@ $installer->run("
     // $product->setWebsiteIds(array(1));
 
     // $product->save(); 
-
+$bids = Mage::getModel('auction/auction')->getCollection();
+if (count($bids)) {
+	foreach ($bids as $bid) {
+		
+		$model = Mage::getModel('auction/deposit');
+		
+		$model->setProductauctionId($bid->getProductauctionId());
+		$model->setProductId($bid->getProductId());
+		$model->setProductName($bid->getProductName());
+		$model->setCustomerId($bid->getCustomerId());
+		$model->setCustomerName($bid->getCustomerName());
+		$model->setCustomerEmail($bid->getCustomerEmail());
+		$model->setCustomerPhone($bid->getCustomerPhone());
+		$model->setCustomerAddress($bid->getCustomerAddress());
+		$model->setStatus('2');
+		$model->setStoreId($bid->getStoreId());		
+	}
+	$model->save();
+}
+		
 
 $installer->endSetup(); 

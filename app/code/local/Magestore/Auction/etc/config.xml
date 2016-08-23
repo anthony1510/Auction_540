@@ -234,11 +234,19 @@
         </helpers>
         <template>
             <email>
+			
 				<magestore_auction_approve_tocustomer translate="label" module="auction">
                     <label>Approve to customer</label>
                     <file>auction/approve_tocustomer.html</file>
                     <type>html</type>
                 </magestore_auction_approve_tocustomer>
+				
+				<magestore_auction_notice_expired translate="label" module="auction">
+                    <label>Notice expired</label>
+                    <file>auction/notice_expired.html</file>
+                    <type>html</type>
+                </magestore_auction_notice_expired>
+				
                 <magestore_auction_new_bid_tobidder translate="label" module="auction">
                     <label>New bid to bidder</label>
                     <file>auction/newbid_tobidder.html</file>
@@ -342,6 +350,7 @@
             </tax>
             <emails>
 				<approve_to_customer_email_template>magestore_auction_approve_tocustomer</approve_to_customer_email_template>
+				<notice_expired_email_template>magestore_auction_notice_expired</notice_expired_email_template>
                 <newbid_to_bidder_email_template>magestore_auction_new_bid_tobidder</newbid_to_bidder_email_template>
                 <newbid_to_admin_email_template>magestore_auction_new_bid_toadmin</newbid_to_admin_email_template>
                 <newbid_to_watcher_email_template>magestore_auction_new_bid_towatcher</newbid_to_watcher_email_template>
