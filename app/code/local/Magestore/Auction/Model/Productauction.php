@@ -16,7 +16,7 @@ class Magestore_Auction_Model_Productauction extends Mage_Core_Model_Abstract {
     public function loadAuctionByProductId($product_id) {
         $collection = $this->getCollection()
                 ->addFieldToFilter('product_id', $product_id)
-                ->addFieldToFilter('status', array('nin' => array(2, 3, 6)))
+                ->addFieldToFilter('status', array('nin' => array(2, 6)))
                 ->setOrder('productauction_id', 'DESC');
 
         if (!count($collection))
@@ -24,7 +24,7 @@ class Magestore_Auction_Model_Productauction extends Mage_Core_Model_Abstract {
 
         foreach ($collection as $item) {
             $status = Mage::helper('auction')->getAuctionStatus($item->getId());
-            if ($status == 4 || $status == 5) //auction processing
+            if ($status == 4 || $status == 5 || $status == 3) //auction processing
                 return $item;
         }
 

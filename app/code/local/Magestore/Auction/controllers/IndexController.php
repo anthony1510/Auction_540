@@ -2,6 +2,34 @@
 
 class Magestore_Auction_IndexController extends Mage_Core_Controller_Front_Action {
 
+    public function testAction(){
+        $bids = Mage::getModel('auction/auction')->getCollection();
+        if (count($bids)) {
+            foreach ($bids as $bid) {
+
+
+                if(count(Mage::getModel('auction/deposit')->getCollection()
+                        ->addFieldToFilter('customer_id', $bid->getCustomerId())
+                        ->addFieldToFilter('productauction_id',$bid->getProductauctionId())) == 0)
+                {
+                    $model = Mage::getModel('auction/deposit');
+                    $model->setProductauctionId($bid->getProductauctionId());
+                    $model->setProductId($bid->getProductId());
+                    $model->setProductName($bid->getProductName());
+                    $model->setCustomerId($bid->getCustomerId());
+                    $model->setCustomerName($bid->getCustomerName());
+                    $model->setCustomerEmail($bid->getCustomerEmail());
+                    $model->setCustomerPhone($bid->getCustomerPhone());
+                    $model->setCustomerAddress($bid->getCustomerAddress());
+                    $model->setStatus('2');
+                    $model->setStoreId($bid->getStoreId());
+                    $model->save();
+                };
+
+            }
+
+        }
+    }
     public function indexAction() {
         if (Mage::getStoreConfig('auction/general/bidder_status') != 1) {
             $this->_redirect('', array());
@@ -19,6 +47,25 @@ class Magestore_Auction_IndexController extends Mage_Core_Controller_Front_Actio
         $this->getLayout()
                 ->getBlock('head')
                 ->setTitle(Mage::helper('core')->__('Auctions'));
+        $this->renderLayout();
+    }
+
+    public function auctionlistAction() {
+        if (!Mage::getSingleton('customer/session')->isLoggedIn()) {
+            $this->_redirect('customer/account/login', array());
+            return;
+        }
+
+        Mage::helper('auction')->updateAuctionStatus();
+        $this->loadLayout();
+        $this->getLayout()
+            ->getBlock('head')
+            ->setTitle(Mage::helper('core')->__('Auction list'));
+
+        $auctionlist = $this->getLayout()->getBlock('customerauctionlist');
+        $pager = $this->getLayout()->createBlock('page/html_pager', 'auction.bid.pager')
+            ->setCollection($auctionlist->getAuctionList());
+        $auctionlist->setChild('pager', $pager);
         $this->renderLayout();
     }
 
@@ -230,6 +277,81 @@ class Magestore_Auction_IndexController extends Mage_Core_Controller_Front_Actio
         }
         $this->_redirect('*/*/emailsetting');
     }
+
+
+    public function checkoutdepositAction() {
+        $productauctionId = $this->getRequest()->getParam('id');
+        if (!$productauctionId) {
+            $this->_redirect('customer/account/index', array());
+            return;
+        }
+
+        $productauction = Mage::getModel('auction/productauction')->load($productauctionId);
+        //check authentication
+        $customer = Mage::getSingleton('customer/session')->getCustomer();
+        if (!$customer || !$customer->getId()) {
+            $this->_redirect('customer/account/index', array());
+            return;
+        }
+
+        $deposit_auction = Mage::getModel('auction/deposit')->getCollection()
+            ->addFieldToFilter('customer_id', $customer->getId())
+            ->addFieldToFilter('productauction_id', $productauctionId);
+        if(count($deposit_auction)>0){
+            $this->_redirect('customer/account/index', array());
+            return;
+        }
+
+        $sku_depositproduct = 'deposit';
+        $product = Mage::getModel('catalog/product')->load(Mage::getModel('catalog/product')->getIdBySku($sku_depositproduct));
+
+        $quote = Mage::getSingleton('checkout/session')->getQuote();
+        if (!$quote->getId() || $quote->getId() <= 0) {
+            $quote = Mage::getModel('sales/quote')->assignCustomer(Mage::getModel('customer/customer')->load($customer->getId()));
+            $quote->setStoreId(Mage::app()->getStore()->getStoreId());
+        } else {
+            $items = $quote->getAllItems();
+            foreach ($items as $item) {
+                $productauction_Id = $item->getOptionByCode('productauction_id');
+                if ($productauction_Id != null && $productauction_Id->getValue() > 0) {
+                    if ($productauction_Id->getValue() == $productauctionId) {
+                        Mage::getSingleton('checkout/session')->addError($this->__('You cannot update the quantity of deposit product.'));
+                        $this->_redirect('checkout/cart', array());
+                        return;
+                    }
+                }
+            }
+        }
+        try {
+            $quoteItem = Mage::getModel('sales/quote_item')->setProduct($product);
+            $deposit_productauction = $productauction->getDeposit();
+            $quoteItem->setCustomPrice($deposit_productauction);
+            $quoteItem->setOriginalCustomPrice($deposit_productauction);
+            $quoteItem->addOption(array(
+                'product_id' => $product->getId(),
+                'product' => $product,
+                'label' => 'Deposit product',
+                'code' => 'productauction_id',
+                'value' => $productauctionId,
+            ));
+            $quoteItem->setQty(1);
+            $quoteItem->getProduct()->setIsSuperMode(true);
+            Mage::getSingleton('core/session')->setData('checkout_deposit_auction', true);
+            //            Mage::getSingleton('core/session')->setData('checkout_auction', true);
+            $quote->addItem($quoteItem);
+            $quote->collectTotals();
+            $quote->save();
+
+            Mage::getSingleton('checkout/session')->setCartWasUpdated(true);
+            Mage::getSingleton('checkout/session')->addSuccess(Mage::helper('checkout')->__('The deposit product %s has been added to cart successfully', $product->getName()));
+            $this->_redirect('checkout/cart', array());
+        } catch (Exception $e) {
+            Mage::getSingleton('core/session')->setData('deposit_auction_addcart_error', $e->getMessage());
+            //            Mage::getSingleton('core/session')->setData('bid_addcart_error', $e->getMessage());
+            $this->_redirect('*/*/customerbid', array());
+        }
+    }
+
 
     public function checkoutAction() {
         $bid_id = $this->getRequest()->getParam('id');

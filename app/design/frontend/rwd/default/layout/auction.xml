@@ -24,6 +24,12 @@
                     <enable>true</enable>
                 </action>
                 <action method="addLink" translate="label" module="auction">
+                    <name>bid</name>
+                    <path>auction/index/auctionlist/</path>
+                    <label>Auction list</label>
+                    <enable>true</enable>
+                </action>
+                <action method="addLink" translate="label" module="auction">
                     <name>auto_bid</name>
                     <path>auction/index/autobidlist/</path>
                     <label>My Auto Bids</label>
@@ -70,6 +76,13 @@
         </reference>	
     </auction_index_customerbid>
 	
+    <auction_index_auctionlist>
+        <update handle="auction_default" />
+        <reference name="content">
+            <block type="auction/customer_auctionlist" name="customerauctionlist" />
+        </reference>
+    </auction_index_auctionlist>
+
     <auction_index_autobidlist>	
         <reference name="root">
             <action method="setTemplate">

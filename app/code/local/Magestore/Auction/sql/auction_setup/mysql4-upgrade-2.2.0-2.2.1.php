@@ -29,44 +29,32 @@ $installer->run("
 	  PRIMARY KEY  (`auctiondeposit_id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8  ;
  ");
-// $product = Mage::getModel('catalog/product');
+ $bids = Mage::getModel('auction/auction')->getCollection();
+        if (count($bids)) {
+            foreach ($bids as $bid) {
 
-    // $product->setSku("ABC123");
-    // $product->setName("Type 7 Widget");
-    // $product->setDescription("This widget will give you years of trouble-free widgeting.");
-    // $product->setShortDescription("High-end widget.");
-    // $product->setPrice(0);
-    // $product->setTypeId('simple');
-    // $product->setAttributeSetId(1); // need to look this up
-    // //$product->setCategoryIds("20,24"); // need to look these up
-    // $product->setWeight(1.0);
-    // $product->setTaxClassId(2); // taxable goods
-    // $product->setVisibility(4); // catalog, search
-    // $product->setStatus(1); // enabled
 
-    // // assign product to the default website
-    // $product->setWebsiteIds(array(1));
+                if(count(Mage::getModel('auction/deposit')->getCollection()
+                        ->addFieldToFilter('customer_id', $bid->getCustomerId())
+                        ->addFieldToFilter('productauction_id',$bid->getProductauctionId())) == 0)
+                {
+                    $model = Mage::getModel('auction/deposit');
+                    $model->setProductauctionId($bid->getProductauctionId());
+                    $model->setProductId($bid->getProductId());
+                    $model->setProductName($bid->getProductName());
+                    $model->setCustomerId($bid->getCustomerId());
+                    $model->setCustomerName($bid->getCustomerName());
+                    $model->setCustomerEmail($bid->getCustomerEmail());
+                    $model->setCustomerPhone($bid->getCustomerPhone());
+                    $model->setCustomerAddress($bid->getCustomerAddress());
+                    $model->setStatus('2');
+                    $model->setStoreId($bid->getStoreId());
+                    $model->save();
+                };
 
-    // $product->save(); 
-$bids = Mage::getModel('auction/auction')->getCollection();
-if (count($bids)) {
-	foreach ($bids as $bid) {
-		
-		$model = Mage::getModel('auction/deposit');
-		
-		$model->setProductauctionId($bid->getProductauctionId());
-		$model->setProductId($bid->getProductId());
-		$model->setProductName($bid->getProductName());
-		$model->setCustomerId($bid->getCustomerId());
-		$model->setCustomerName($bid->getCustomerName());
-		$model->setCustomerEmail($bid->getCustomerEmail());
-		$model->setCustomerPhone($bid->getCustomerPhone());
-		$model->setCustomerAddress($bid->getCustomerAddress());
-		$model->setStatus('2');
-		$model->setStoreId($bid->getStoreId());		
-	}
-	$model->save();
-}
+            }
+
+        }
 		
 
 $installer->endSetup(); 

@@ -54,7 +54,7 @@ class Magestore_Auction_Helper_Data extends Mage_Core_Helper_Abstract {
         $IDs = array();
         $productIds = array();
         $collection = Mage::getModel('auction/productauction')->getCollection()
-                ->addFieldToFilter('status', array('in' => array(4)));
+                ->addFieldToFilter('status', array('in' => array(3,4)));
         if ($featured) {
             $collection->addFieldToFilter('featured', '1');
         }
@@ -199,6 +199,15 @@ class Magestore_Auction_Helper_Data extends Mage_Core_Helper_Abstract {
     public function getListFeaturedStatus() {
         return array(1 => $this->__('Yes'),
             2 => $this->__('No'),
+        );
+    }
+	//for page auctionlist frontend
+    public function getAuctionListStatus() {
+        return array(1 => $this->__('Pending'),
+            2 => $this->__('Underway / No bid'),
+            3 => $this->__('Underway / Bid'),
+            4 => $this->__('Lose'),
+            5 => $this->__('Win'),
         );
     }
 

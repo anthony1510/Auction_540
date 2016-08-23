@@ -1,0 +1,66 @@
+<?php $auctionlist = $this->getAuctionList() ?>
+<?php $auctionListStatus = Mage::helper('auction')->getAuctionListStatus() ?>
+<?php $store = Mage::getModel('core/store') ?>
+<div class="page-title">
+	<h1> <?php echo $this->__('Auction list')?></h1>
+</div>
+<div class="auction-error">
+	<?php echo Mage::getSingleton('core/session')->getData('bid_addcart_error') ?>
+	<?php Mage::getSingleton('core/session')->setData('bid_addcart_error','') ?>
+</div>
+<div id="list-auctionbid">
+<?php
+    $bidderType = Mage::getStoreConfig('auction/general/bidder_name_type');
+    $customer = $this->getCustomer();
+    if($bidderType == '2' || $bidderType == '3'): ?>
+    <h5> <?php echo $customer->getBidderName(); ?></h5>
+<?php endif; ?>
+
+<?php if(count($auctionlist)) : ?>
+<?php echo $this->getChildHtml('pager'); ?>
+	<table cellspacing="0" cellpadding="0" class="data-table" id="list_customer_auctionblist">
+	<thead>
+		<tr>
+			<th><?php echo $this->__('#')?></th>
+			<th><?php echo $this->__('Product Name in auction')?></th>
+			<th><?php echo $this->__('Start time')?></th>
+			<th><?php echo $this->__('End time')?></th>
+			<th><?php echo $this->__('Status')?></th>
+		</tr>
+	</thead>
+	<?php foreach($auctionlist as $itemdeposit): ?>
+		<?php $item = Mage::getModel('auction/productauction')->load($itemdeposit->getProductauctionId());?>
+		<?php $statusAuctionList= $this->getStatusAuctionList($item->getProductauctionId());?>
+		<?php $store->load($item->getStoreId()) ?>
+		<?php $end_time =  new Zend_Date($item->getEndDate().' '.$item->getEndTime(),null,'en_GB') ?>
+		<?php $start_time =  new Zend_Date($item->getStartDate().' '.$item->getStartTime(),null,'en_GB') ?>
+		<tr>
+			<td>
+				<?php echo $item->getProductauctionId();?>
+			</td>
+			<td>
+				<a href="<?php echo Mage::getModel('catalog/product')->load($item->getProductId())->getProductUrl() ?>">
+					<?php echo $item->getProductName() ?>
+				</a>
+			</td>
+            <td><?php echo $this->formatDate($start_time,'medium',true) ?></td>
+            <td><?php echo $this->formatDate($end_time,'medium',true) ?></td>
+            <td><?php echo $auctionListStatus[$statusAuctionList]; ?></td>
+		</tr>
+	<?php endforeach; ?>
+	</table>
+	<?php echo $this->getChildHtml('pager'); ?>
+	<script type="text/javascript">decorateTable('list_customer_auctionblist');</script>
+	<?php else : ?>
+	<br/>
+	<div class="note-msg">
+		<p><?php echo $this->__('You have placed no bids') ?>.</p>
+	</div><br/>
+	<?php endif; ?>
+</div>
+<div class="button-set">
+	<a class="left" href="javascript:history.go(-1);"> <?php echo $this->__('Back') ?></a>
+</div>
+<style type="text/css">
+	<?php echo Mage::getStoreConfig('auction/design/css') ?>
+</style>
