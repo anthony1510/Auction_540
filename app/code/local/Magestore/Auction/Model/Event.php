@@ -2,6 +2,17 @@
 
 class Magestore_Auction_Model_Event {
 
+    public function remove_delete_disable_sku($observer){
+        $productId = Mage::app()->getRequest()->getParam('id');
+        $product = Mage::getModel('catalog/product')->load($productId);
+        if($product->getSku() == 'deposit'){
+            $block = $observer->getBlock();
+            if($block->getType() == 'adminhtml/catalog_product_edit'){
+                $block->unsetChild('delete_button');
+            }
+        }
+
+    }
     public function getlink() {
         $link = Mage::app()->getRequest()->getRouteName() .
                 Mage::app()->getRequest()->getControllerName() .
@@ -314,6 +325,12 @@ class Magestore_Auction_Model_Event {
             Mage::getSingleton('core/session')->setData('checkout_auction', false);
             return;
         }
+
+        if (Mage::getSingleton('core/session')->getData('checkout_deposit_auction') == true) {
+            Mage::getSingleton('core/session')->setData('checkout_deposit_auction', false);
+            return;
+        }
+
         if (Mage::getSingleton('core/session')->getData('add_auction') == true) {
             Mage::getSingleton('core/session')->setData('add_auction', false);
             return;
@@ -325,6 +342,13 @@ class Magestore_Auction_Model_Event {
             $item->setQty(1);
             Mage::getSingleton('checkout/session')->getMessages(true);
             Mage::getSingleton('checkout/session')->addError(Mage::helper('auction')->__('You cannot update the quantity of autioned product(s).'));
+        }
+
+        $productauction_Id = $item->getOptionByCode('productauction_id');
+        if ($productauction_Id != null && $productauction_Id->getValue() > 0) {
+            $item->setQty(1);
+            Mage::getSingleton('checkout/session')->getMessages(true);
+            Mage::getSingleton('checkout/session')->addError(Mage::helper('auction')->__('You cannot update the quantity of deposit product(s).'));
         }
     }
 
@@ -341,6 +365,16 @@ class Magestore_Auction_Model_Event {
                     $action->setFlag('', Mage_Core_Controller_Varien_Action::FLAG_NO_DISPATCH, true);
                     $result = array();
                     $result['error'] = Mage::helper('auction')->__('Can not update auction quantity!');
+                    $action->getResponse()->setHeader('Content-type', 'application/json');
+                    $action->getResponse()->setBody(Mage::helper('core')->jsonEncode($result));
+                }
+
+                $productauction_Id = $item->getOptionByCode('productauction_id');
+                if ($productauction_Id != null && $productauction_Id->getValue() > 0) {
+                    $action->loadLayout();
+                    $action->setFlag('', Mage_Core_Controller_Varien_Action::FLAG_NO_DISPATCH, true);
+                    $result = array();
+                    $result['error'] = Mage::helper('auction')->__('Can not update deposit product quantity!');
                     $action->getResponse()->setHeader('Content-type', 'application/json');
                     $action->getResponse()->setBody(Mage::helper('core')->jsonEncode($result));
                 }
@@ -363,12 +397,23 @@ class Magestore_Auction_Model_Event {
                     Mage::getSingleton('checkout/session')->addError(Mage::helper('auction')->__('Can not update auction quantity!'));
                     Mage::app()->getResponse()->setRedirect(Mage::getUrl('checkout/cart'));
                 }
+
+                $productauction_Id = $item->getOptionByCode('productauction_id');
+                if ($productauction_Id != null && $productauction_Id->getValue() > 0) {
+                    $action->loadLayout();
+                    $action->setFlag('', Mage_Core_Controller_Varien_Action::FLAG_NO_DISPATCH, true);
+                    $result = array();
+                    $result['error'] = Mage::helper('auction')->__('Can not update deposit product quantity!');
+                    $action->getResponse()->setHeader('Content-type', 'application/json');
+                    $action->getResponse()->setBody(Mage::helper('core')->jsonEncode($result));
+                }
                 break;
             }
         }
     }
 
     public function after_save_order($observer) {
+
         if (!Mage::registry('check_transaction')) {
             Mage::register('check_transaction', '1');
             $order = $observer->getEvent()->getOrder();
@@ -390,6 +435,42 @@ class Magestore_Auction_Model_Event {
                                 ->save();
                     } catch (Exception $e) {
                         Mage::log($e->getMessage(), null, 'auction.log');
+                    }
+                }
+
+                $productauction_Id = $item->getOptionByCode('productauction_id');
+                if ($productauction_Id != null && $productauction_Id->getValue() > 0) {
+                    try {
+                        Mage::log($productauction_Id->getValue(),null,'auctionDeposit.log');
+                    $deposit = 50;
+
+                    $sku_depositproduct = 'deposit';
+                    $product = Mage::getModel('catalog/product')->load(Mage::getModel('catalog/product')->getIdBySku($sku_depositproduct));
+
+                    $customer = Mage::getSingleton('customer/session')->getCustomer();
+
+                    $data = array(
+                        'productauction_id' => $productauction_Id->getValue(),
+                        'product_id' => $product->getId(),
+                        'product_name' => $product->getName(),
+                        'customer_id' => $customer->getId(),
+                        'customer_name' => $customer->getName(),
+                        'customer_email' => "Email",
+                        'customer_phone' => 'Phone',
+                        'customer_address' => "address",
+                        'deposit' => $deposit,
+                        'status' => 1,
+                        'store_id' => Mage::app()->getStore()->getStoreId(),
+                    );
+
+                    Mage::log($data,null,'auctionDeposit.log');
+
+                    $auctionDeposit = Mage::getModel('auction/deposit');
+                    $auctionDeposit->setData($data);
+                    $auctionDeposit->save();
+                    } catch (Exception $e) {
+                        Mage::log($e->getMessage(), null, 'auction.log');
+
                     }
                 }
             }

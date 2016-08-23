@@ -54,23 +54,23 @@ class Magestore_Auction_Block_Adminhtml_Productauction_Edit_Tab_Listauctiondepos
 			 ),
         ));
 		
-		$this->addColumn('action', array(
-            'header' => Mage::helper('auction')->__('Action'),
-            'width' => '100',
-            'type' => 'action',
-            'getter' => 'getId',
-            'actions' => array(
-                array(
-                    'caption' => Mage::helper('auction')->__('Change Status'),
-                    'url' => array('base' => '*/*/changedepositStatus'),
-                    'field' => 'id'
-                )
-            ),
-            'filter' => false,
-            'sortable' => false,
-            'index' => 'stores',
-            'is_system' => true,
-        ));
+		// $this->addColumn('action', array(
+  //           'header' => Mage::helper('auction')->__('Action'),
+  //           'width' => '100',
+  //           'type' => 'action',
+  //           'getter' => 'getId',
+  //           'actions' => array(
+  //               array(
+  //                   'caption' => Mage::helper('auction')->__('Change Status'),
+  //                   'url' => array('base' => '*/*/changedepositStatus'),
+  //                   'field' => 'id'
+  //               )
+  //           ),
+  //           'filter' => false,
+  //           'sortable' => false,
+  //           'index' => 'stores',
+  //           'is_system' => true,
+  //       ));
 		
         // $this->addExportType('*/*/exportDepositCsv', Mage::helper('auction')->__('CSV'));
         // $this->addExportType('*/*/exportDepositXml', Mage::helper('auction')->__('XML'));
@@ -78,35 +78,35 @@ class Magestore_Auction_Block_Adminhtml_Productauction_Edit_Tab_Listauctiondepos
         return parent::_prepareColumns();
     }
 
-    // protected function _prepareMassaction() {
-        // $this->setMassactionIdField('auctiondeposit_id');
-        // $this->getMassactionBlock()->setFormFieldName('auctiondeposit');
+    protected function _prepareMassaction() {
+        $this->setMassactionIdField('auctiondeposit_id');
+        $this->getMassactionBlock()->setFormFieldName('auctiondeposit');
 
-       // /*mass change status*/
-		 // $statuses = array(
-		 // 1 => Mage::helper('auction')->__('Pending'),
-		 // 2 => Mage::helper('auction')->__('Approved')
-		 // );
-		 // array_unshift($statuses, array('label' => '', 'value' => ''));
-		 // $this->getMassactionBlock()->addItem('status', array(
-		 // 'label' => Mage::helper('auction')->__('Change status'),
-		 // 'url' => $this->getUrl('*/*/massdepositStatus', array('_current' => true)),
-		 // 'additional' => array(
-		 // 'visibility' => array(
-		 // 'name' => 'status',
-		 // 'type' => 'select',
-		 // 'class' => 'required-entry',
-		 // 'label' => Mage::helper('auction')->__('Status'),
-		 // 'values' => $statuses
-		 // ))
-		 // ));
+       /*mass change status*/
+		 $statuses = array(
+		 1 => Mage::helper('auction')->__('Pending'),
+		 2 => Mage::helper('auction')->__('Approved')
+		 );
+		 array_unshift($statuses, array('label' => '', 'value' => ''));
+		 $this->getMassactionBlock()->addItem('status', array(
+		 'label' => Mage::helper('auction')->__('Change status'),
+		 'url' => $this->getUrl('*/*/massdepositStatus', array('_current' => true)),
+		 'additional' => array(
+		 'visibility' => array(
+		 'name' => 'status',
+		 'type' => 'select',
+		 'class' => 'required-entry',
+		 'label' => Mage::helper('auction')->__('Status'),
+		 'values' => $statuses
+		 ))
+		 ));
 
-        // return $this;
-    // }
-	// protected function getAdditionalJavascript() {
-       // return 'window.listauctiondepositGrid_massactionJsObject = listauctiondepositGrid_massactionJsObject;';
-	// //'window.{gridId}_massactionJsObject = {gridId}_massactionJsObject;';
-    // }
+        return $this;
+    }
+	protected function getAdditionalJavascript() {
+       return 'window.listauctiondepositGrid_massactionJsObject = listauctiondepositGrid_massactionJsObject;';
+	//'window.{gridId}_massactionJsObject = {gridId}_massactionJsObject;';
+    }
 
     
     public function getGridUrl() {

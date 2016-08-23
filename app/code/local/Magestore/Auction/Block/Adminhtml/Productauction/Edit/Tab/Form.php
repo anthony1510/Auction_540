@@ -44,6 +44,14 @@ class Magestore_Auction_Block_Adminhtml_Productauction_Edit_Tab_Form extends Mag
 							<input type="hidden" name="product_id" id="product_id" value="' . $data->getProductId() . '">',
         ));
 
+        $fieldset->addField('deposit', 'text', array(
+            'label' => Mage::helper('auction')->__('Deposit'),
+            'class' => 'required-entry',
+            'required' => true,
+            'name' => 'deposit',
+            'disabled' => $disabled,
+        ));
+
         $fieldset->addField('init_price', 'text', array(
             'label' => Mage::helper('auction')->__('Starting Price'),
             'class' => 'required-entry',
@@ -74,14 +82,6 @@ class Magestore_Auction_Block_Adminhtml_Productauction_Edit_Tab_Form extends Mag
         $fieldset->addField('max_interval_price', 'text', array(
             'label' => Mage::helper('auction')->__('Maximum Bid Increment'),
             'name' => 'max_interval_price',
-            'disabled' => $disabled,
-        ));
-		
-		 $fieldset->addField('deposit', 'text', array(
-            'label' => Mage::helper('auction')->__('Deposit'),
-            'class' => 'required-entry',
-            'required' => true,
-            'name' => 'deposit',
             'disabled' => $disabled,
         ));
 

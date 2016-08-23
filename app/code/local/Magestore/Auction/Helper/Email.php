@@ -7,10 +7,18 @@ class Magestore_Auction_Helper_Email extends Mage_Core_Helper_Abstract {
 
     public function sendAuctionCompleteEmail($auction) {
         $winnerBids = $auction->getWinnerBids();
-        if (count($winnerBids))
+		if (count($winnerBids))
             foreach ($winnerBids as $winnerBid) {
                 $winnerBid->emailToWinner();
             }
+			
+		$timestamp = Mage::getModel('core/date')->timestamp(time());
+		$end_time = strtotime($auction->getEndTime() . ' ' . $auction->getEndDate());
+		$day_close = Mage::getStoreConfig('auction/general/day_close');
+		$last_time= ($day_close - 1)*24*3600 + $end_time;	
+		if($last_time - $timestamp < 0){
+			$auction->noticeExpired();
+		}
         $auction->emailNoticeCompleted();
         $auction->emailNoticeCompletedToWatcher();
         $this->noticeOutBid($auction);

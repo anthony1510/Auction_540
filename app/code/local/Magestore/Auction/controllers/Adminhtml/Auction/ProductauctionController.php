@@ -530,60 +530,64 @@ class Magestore_Auction_Adminhtml_Auction_ProductauctionController extends Mage_
 	/**
 	 * mass change status for deposit(s) action
 	 */
-	// public function massdepositStatusAction() {
-	 // $product_id = $this->getRequest()->getParam('id');
-	 // $Ids = $this->getRequest()->getParam('auctiondeposit');
-	 // if (!is_array($Ids)) {
-	 // Mage::getSingleton('adminhtml/session')->addError($this->__('Please select deposit(s)'));
-	 // } else {
-		 // try {
-			 // foreach ($Ids as $Id) {
-				 // Mage::getSingleton('auction/deposit')
-				 // ->load($Id)
-				 // ->setStatus($this->getRequest()->getParam('status'))
-				 // ->setIsMassupdate(true)
-				 // ->save();
-				 // }
-			 // $this->_getSession()->addSuccess(
-			 // $this->__('Total of %d record(s) were successfully updated', count($Ids))
-			 // );
-		 // } catch (Exception $e) {
-		 // $this->_getSession()->addError($e->getMessage());
-		 // }
-	 // }
-	 // $this->_redirect('*/*/edit', array('id' => $product_id)
-            // );
-	// }
+	public function massdepositStatusAction() {
+	 $product_id = $this->getRequest()->getParam('id');
+	 $Ids = $this->getRequest()->getParam('auctiondeposit');
+	 if (!is_array($Ids)) {
+	 Mage::getSingleton('adminhtml/session')->addError($this->__('Please select deposit(s)'));
+	 } else {
+		 try {
+			 foreach ($Ids as $Id) {
+				 Mage::getSingleton('auction/deposit')
+				 ->load($Id)
+				 ->setStatus($this->getRequest()->getParam('status'))
+				 ->setIsMassupdate(true)
+				 ->save();
+				 }
+			 $this->_getSession()->addSuccess(
+			 $this->__('Total of %d record(s) were successfully updated', count($Ids))
+			 );
+             
+		 } catch (Exception $e) {
+		 $this->_getSession()->addError($e->getMessage());
+		 }
+	 }
+     $model = Mage::getModel('auction/deposit')
+                ->load($this->getRequest()->getParam('id'));
+     $model->->emailApproveToCustomer();
+	 $this->_redirect('*/*/edit', array('id' => $product_id)
+            );
+	}
 	
 	/**
 	*Action change status for deposit
 	*/
-	public function changedepositStatusAction() {
-		$model = Mage::getModel('auction/deposit')
-                ->load($this->getRequest()->getParam('id'));
-		$status = $model->getStatus();
-		$productauction_id = $model->getProductauctionId();
-		if($status == 1){
-			$model->setStatus(2);
-			try {
-			$model->save();
-			$model->emailApproveToCustomer();
-			$this->_getSession()->addSuccess($this->__('Status deposit were successfully updated'));
-			} catch (Exception $e) {
-			$this->_getSession()->addError($e->getMessage());
-			}
-		}else{
-			$model->setStatus(1);
-			try {
-			$model->save();
-			$this->_getSession()->addSuccess(
-			$this->__('Status deposit were successfully updated'));
-			} catch (Exception $e) {
-			$this->_getSession()->addError($e->getMessage());
-			}
-		}
-		$this->_redirect('*/*/edit', array('id' => $productauction_id));
-	}
+	// public function changedepositStatusAction() {
+	// 	$model = Mage::getModel('auction/deposit')
+ //                ->load($this->getRequest()->getParam('id'));
+	// 	$status = $model->getStatus();
+	// 	$productauction_id = $model->getProductauctionId();
+	// 	if($status == 1){
+	// 		$model->setStatus(2);
+	// 		try {
+	// 		$model->save();
+	// 		$model->emailApproveToCustomer();
+	// 		$this->_getSession()->addSuccess($this->__('Status deposit were successfully updated'));
+	// 		} catch (Exception $e) {
+	// 		$this->_getSession()->addError($e->getMessage());
+	// 		}
+	// 	}else{
+	// 		$model->setStatus(1);
+	// 		try {
+	// 		$model->save();
+	// 		$this->_getSession()->addSuccess(
+	// 		$this->__('Status deposit were successfully updated'));
+	// 		} catch (Exception $e) {
+	// 		$this->_getSession()->addError($e->getMessage());
+	// 		}
+	// 	}
+	// 	$this->_redirect('*/*/edit', array('id' => $productauction_id));
+	// }
 
     public function exportCsvAction() {
         $fileName = 'auction.csv';

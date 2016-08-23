@@ -158,6 +158,19 @@ class Magestore_Auction_Block_Auction extends Mage_Core_Block_Template {
         }
     }
 
+    public function getStatusPayedDeposit(){
+        $customerId = Mage::getSingleton('customer/session')->getCustomerId();
+        $auction = $this->getAuction();
+        $deposit_auction = Mage::getModel('auction/deposit')->getCollection()
+            ->addFieldToFilter('customer_id', $customerId)
+            ->addFieldToFilter('productauction_id', $auction->getProductauctionId());
+        if(count($deposit_auction)>0){
+            return $deposit_auction->getFirstItem()->getStatus();
+        }else{
+            return 0;
+        }
+    }
+
     public function isWatcher() {
         $customerId = Mage::getSingleton('customer/session')->getCustomerId();
         $auction = $this->getAuction();

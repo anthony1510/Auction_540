@@ -6,7 +6,8 @@ class Magestore_Auction_Model_Productauction extends Mage_Core_Model_Abstract {
     const XML_PATH_ADMIN_EMAIL_IDENTITY = "trans_email/ident_general";
     const XML_PATH_NOTICE_AUCTION_COMPLETED = "auction/emails/notice_auction_completed";
     const XML_PATH_NOTICE_AUCTION_COMPLETED_TO_WATCHER = "auction/emails/notice_auction_completed_towatcher";
-
+	const XML_PATH_NOTICE_EXPIRED = "auction/emails/notice_expired_email_template";
+	
     public function _construct() {
         parent::_construct();
         $this->_init('auction/productauction');
@@ -15,7 +16,7 @@ class Magestore_Auction_Model_Productauction extends Mage_Core_Model_Abstract {
     public function loadAuctionByProductId($product_id) {
         $collection = $this->getCollection()
                 ->addFieldToFilter('product_id', $product_id)
-                ->addFieldToFilter('status', array('nin' => array(2, 3, 6)))
+                ->addFieldToFilter('status', array('nin' => array(2, 6)))
                 ->setOrder('productauction_id', 'DESC');
 
         if (!count($collection))
@@ -23,7 +24,7 @@ class Magestore_Auction_Model_Productauction extends Mage_Core_Model_Abstract {
 
         foreach ($collection as $item) {
             $status = Mage::helper('auction')->getAuctionStatus($item->getId());
-            if ($status == 4 || $status == 5) //auction processing
+            if ($status == 4 || $status == 5 || $status == 3) //auction processing
                 return $item;
         }
 
@@ -247,6 +248,40 @@ class Magestore_Auction_Model_Productauction extends Mage_Core_Model_Abstract {
             return $this;
         }
     }
+	
+	public function noticeExpired() {
+        
+            $storeID = Mage::getModel('auction/auction')->getStoreId();
+            $translate = Mage::getSingleton('core/translate');
+            $translate->setTranslateInline(false);
+
+            $template = Mage::getStoreConfig(self::XML_PATH_NOTICE_EXPIRED, $storeID);
+			$collection = Mage::getModel('auction/auction')->getCollection()
+                    ->addFieldToFilter('productauction_id', $this->getProductauctionId())
+                    ->addFieldToFilter('status', 5);
+            $sendTo = array();
+            $i = 0;
+            foreach ($collection as $col) {
+    
+                $sendTo[$i]['name'] = $col->getBidderName();
+                $sendTo[$i]['email'] = $col->getCustomerEmail();
+                $i++;
+            }
+
+            $mailTemplate = Mage::getModel('core/email_template');
+
+            foreach ($sendTo as $recipient) {
+                $mailTemplate->setDesignConfig(array('area' => 'frontend', 'store' => $storeID))
+                        ->sendTransactional(
+                                $template, Mage::getStoreConfig(self::XML_PATH_SALES_EMAIL_IDENTITY, $storeID), $recipient['email'], $recipient['name'], array(
+                            'bid' => $col
+                                )
+                );
+            }
+
+            $translate->setTranslateInline(true);
+            return $this;
+   }
 
     public function getMultiWinnerBid() {
 
