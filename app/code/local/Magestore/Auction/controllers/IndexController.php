@@ -3,32 +3,21 @@
 class Magestore_Auction_IndexController extends Mage_Core_Controller_Front_Action {
 
     public function testAction(){
-        $bids = Mage::getModel('auction/auction')->getCollection();
-        if (count($bids)) {
-            foreach ($bids as $bid) {
+        $setup = new Mage_Core_Model_Resource_Setup();
+        $installer = $setup;
+        $installer->startSetup();
+        $installer->run("
 
-
-                if(count(Mage::getModel('auction/deposit')->getCollection()
-                        ->addFieldToFilter('customer_id', $bid->getCustomerId())
-                        ->addFieldToFilter('productauction_id',$bid->getProductauctionId())) == 0)
-                {
-                    $model = Mage::getModel('auction/deposit');
-                    $model->setProductauctionId($bid->getProductauctionId());
-                    $model->setProductId($bid->getProductId());
-                    $model->setProductName($bid->getProductName());
-                    $model->setCustomerId($bid->getCustomerId());
-                    $model->setCustomerName($bid->getCustomerName());
-                    $model->setCustomerEmail($bid->getCustomerEmail());
-                    $model->setCustomerPhone($bid->getCustomerPhone());
-                    $model->setCustomerAddress($bid->getCustomerAddress());
-                    $model->setStatus('2');
-                    $model->setStoreId($bid->getStoreId());
-                    $model->save();
-                };
-
-            }
-
+            ALTER TABLE {$setup->getTable('auction_product')} 
+                ADD `last_date_for_auction` DATE NOT NULL;
+         ");
+        $collection = Mage::getModel('auction/productauction')->getCollection();
+        foreach ($collection as $auction){
+            $auction->setLastDateForAuction($auction->getEndDate());
+            $auction->save();
         }
+        echo "success";
+
     }
     public function indexAction() {
         if (Mage::getStoreConfig('auction/general/bidder_status') != 1) {
@@ -366,8 +355,11 @@ class Magestore_Auction_IndexController extends Mage_Core_Controller_Front_Actio
 		$timestamp = Mage::getModel('core/date')->timestamp(time());
 		$productauction = Mage::getModel('auction/productauction')->load($bid->getProductauctionId());
 		$end_time = strtotime($productauction->getEndTime() . ' ' . $productauction->getEndDate());
+		$start_time = strtotime($productauction->getStartTime() . ' ' . $productauction->getStartDate());
 		$day_close = Mage::getStoreConfig('auction/general/day_close');
-		$last_time= $day_close*24*3600 + $end_time;
+		$last_time= $day_close*24*3600 + $start_time;
+        if($last_time<$end_time)
+            $last_time = $end_time;
 		
 		if($last_time - $timestamp < 0){
 			$this->_redirect('*/*/customerbid', array());

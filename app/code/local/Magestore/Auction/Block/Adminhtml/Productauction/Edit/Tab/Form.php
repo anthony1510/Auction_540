@@ -103,9 +103,8 @@ class Magestore_Auction_Block_Adminhtml_Productauction_Edit_Tab_Form extends Mag
             'note' => Mage::helper('auction')->__('24-hour time format: [hh]:[mm]:[ss]. For example: 14:30:00'),
         ));
 
-
         $fieldset->addField('end_date', 'date', array(
-            'label' => Mage::helper('auction')->__('End Date'),
+            'label' => Mage::helper('auction')->__('End date'),
             'class' => 'required-entry',
             'required' => true,
             'name' => 'end_date',
@@ -132,6 +131,16 @@ class Magestore_Auction_Block_Adminhtml_Productauction_Edit_Tab_Form extends Mag
             'disabled' => $disabled,
         ));
 
+        $fieldset->addField('last_date_for_auction', 'date', array(
+            'label' => Mage::helper('auction')->__('Last date for auction'),
+            'class' => 'required-entry',
+            'required' => true,
+            'name' => 'last_date_for_auction',
+            'format' => 'yyyy-MM-dd',
+            'image' => $image_calendar,
+            'disabled' => $disabled,
+        ));
+
 
         $fieldset->addField('multi_winner', 'text', array(
             'label' => Mage::helper('auction')->__('Multiple Winner'),
@@ -149,6 +158,8 @@ class Magestore_Auction_Block_Adminhtml_Productauction_Edit_Tab_Form extends Mag
             'disabled' => $disabled,
             'note' => 'If Yes, all customers can buy a product at actual price without auctioning.',
         ));
+
+
 
         $fieldset->addField('day_to_buy', 'text', array(
             'label' => Mage::helper('auction')->__('Sell normally after'),

@@ -34,11 +34,14 @@
 		<?php $store->load($item->getStoreId()) ?>
 		<?php $create_time =  new Zend_Date($item->getCreatedDate().' '.$item->getCreatedTime(),null,'en_GB') ?>
 		<?php
-			 $timestamp = Mage::getModel('core/date')->timestamp(time());
-			 $productauction = Mage::getModel('auction/productauction')->load($item->getProductauctionId());
-			 $end_time = strtotime($productauction->getEndTime() . ' ' . $productauction->getEndDate());
-			 $day_close = Mage::getStoreConfig('auction/general/day_close');
-			 $last_time= $day_close*24*3600 + $end_time;
+		 	$timestamp = Mage::getModel('core/date')->timestamp(time());
+		 	$productauction = Mage::getModel('auction/productauction')->load($item->getProductauctionId());
+		 	$end_time = strtotime($productauction->getEndTime() . ' ' . $productauction->getEndDate());
+		 	$start_time = strtotime($auction->getStartTime() .' '. $auction->getStartDate());
+		 	$day_close = Mage::getStoreConfig('auction/general/day_close');
+		 	$last_time= $day_close*24*3600 + $start_time;
+			if($last_time<$end_time)
+				$last_time = $end_time;
 			 ?>
 		<tr>
 			<td>

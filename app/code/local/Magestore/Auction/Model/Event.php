@@ -446,13 +446,14 @@ class Magestore_Auction_Model_Event {
 
                     $sku_depositproduct = 'deposit';
                     $product = Mage::getModel('catalog/product')->load(Mage::getModel('catalog/product')->getIdBySku($sku_depositproduct));
+                    $productauction = Mage::getModel('auction/productauction')->load($productauction_Id->getValue());
 
                     $customer = Mage::getSingleton('customer/session')->getCustomer();
 
                     $data = array(
                         'productauction_id' => $productauction_Id->getValue(),
-                        'product_id' => $product->getId(),
-                        'product_name' => $product->getName(),
+                        'product_id' => $productauction->getProductId(),
+                        'product_name' => $productauction->getProductName(),
                         'customer_id' => $customer->getId(),
                         'customer_name' => $customer->getName(),
                         'customer_email' => "Email",

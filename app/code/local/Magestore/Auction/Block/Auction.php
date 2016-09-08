@@ -31,6 +31,20 @@ class Magestore_Auction_Block_Auction extends Mage_Core_Block_Template {
         return $this->getData('product');
     }
 
+    public function getAllowBid($auction){
+        $customer = Mage::getSingleton('customer/session')->getCustomer();
+        $collection = Mage::getModel('auction/deposit')->getCollection()
+            ->addFieldToFilter('productauction_id',$auction->getId())
+            ->addFieldToFilter('customer_id',$customer->getId());
+        if(count($collection)){
+            return true;
+        }
+        if(strtotime($auction->getLastDateForAuction())<time()){
+            return false;
+        }
+        return true;
+    }
+
     public function getAuction() {
         $product = $this->getProduct();
         if (!$this->hasData('auction')) {

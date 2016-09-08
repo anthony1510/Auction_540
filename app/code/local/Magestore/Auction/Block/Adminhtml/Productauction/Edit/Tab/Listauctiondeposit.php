@@ -95,7 +95,6 @@ class Magestore_Auction_Block_Adminhtml_Productauction_Edit_Tab_Listauctiondepos
 		 'visibility' => array(
 		 'name' => 'status',
 		 'type' => 'select',
-		 'class' => 'required-entry',
 		 'label' => Mage::helper('auction')->__('Status'),
 		 'values' => $statuses
 		 ))

@@ -554,7 +554,7 @@ class Magestore_Auction_Adminhtml_Auction_ProductauctionController extends Mage_
 	 }
 	     $model = Mage::getModel('auction/deposit')
 		        ->load($this->getRequest()->getParam('id'));
-	     $model->->emailApproveToCustomer();
+	     $model->emailApproveToCustomer();
 	 $this->_redirect('*/*/edit', array('id' => $product_id)
             );
 	}

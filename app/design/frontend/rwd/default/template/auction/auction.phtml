@@ -6,7 +6,6 @@
         <?php $product = $this->getProduct() ?>
         <?php $form_url = $this->getBidUrl() ?>
         <div class="divider"></div>
-        <?php if ($auction->getStatus() != 3) : ?>
         <div id="auction">
             <?php if ($auction->getStatus() == 4) : ?>
                 <h4><?php echo $this->__('Auction ends in: ') ?> <span id="auction_timeleft" class="auction_timeleft"> </span></h4>	
@@ -39,59 +38,68 @@
                     <?php $currentPrice = $lastBid->getPrice() ? $lastBid->getPrice() : $auction->getInitPrice() ?>	
                     <?php $min_next_price = $auction->getMinNextPrice() ?>
                     <?php $max_next_price = $auction->getMaxNextPrice() ?>
+                 
                     <?php $max_condition = $max_next_price ? ' ' . $this->__('to') . ' ' . Mage::helper('core')->currency($max_next_price) : '' ?>
                     <div class="bid-box">
-                        <?php if($this->getStatusPayedDeposit()==2 || $this->getStatusPayedDeposit()==1):?>
-                        <div class="row">
+                        <?php if($this->getAllowBid($auction)):?>
+                            <?php if($this->getStatusPayedDeposit()==2 || $this->getStatusPayedDeposit()==1):?>
+                                <div class="row">
 
 
-                            <?php echo $this->__('Your bid') ?>
-                            <span class="" id="price_condition_<?php echo $auction->getId() ?>">
+                                    <?php echo $this->__('Your bid') ?>
+                                    <span class="" id="price_condition_<?php echo $auction->getId() ?>">
                                 <?php if ($max_condition): ?>
                                     <?php echo '(' . $this->__('Enter an amount from') . ' ' . Mage::helper('core')->currency($min_next_price) . $max_condition . ')' ?>
                                 <?php else : ?>
-                                    <?php echo '(' . $this->__('Enter %s or more',Mage::helper('core')->currency($min_next_price)) . ')' ?> 														
+                                    <?php echo '(' . $this->__('Enter %s or more',Mage::helper('core')->currency($min_next_price)) . ')' ?>
                                 <?php endif; ?>
                             </span>
 
-                        </div>
-                        <div class="row" style="height: 35px;">
-                            <input type="text" class="input-text" name="price" id="bid_price" onchange="validNumeric(this);" onkeypress="return disableEnterKey(event)" width="100px"/>
-                            <input type="hidden" name="product_id" id="auction_product_id" value="<?php echo $product->getId() ?>">
-                            <?php $imgSrc = $_helper->getBidButtonImage() ?>
-                            <?php if ($imgSrc): ?>
-                                <button class="image-button" id="auction_bid_button" type="button" onmouseover="overBidButton(this);" onmouseout="outBidButton(this);"  onclick="submitBid();" >
-                                    <img onmouseover="overBidButton(this);" onmouseout="outBidButton(this);" src="<?php echo $imgSrc; ?>" alt="<?php echo $this->__('Bid'); ?>" height="30px"/>
-                                </button>
-                            <?php else: ?>
-                                <button class="button" id="auction_bid_button" type="button" onmouseover="overBidButton(this);" onmouseout="outBidButton(this);"  onclick="submitBid();" >
-                                    <span onmouseover="overBidButton(this);" onmouseout="outBidButton(this);"><?php echo $this->__('Bid') ?></span>
-                                </button>
-                            <?php endif; ?>
-                            <span id="auction_bid_waitting" style="display:none;" class="opc-please-wait">
+                                </div>
+                                <div class="row" style="height: 35px;">
+                                    <input type="text" class="input-text" name="price" id="bid_price" onchange="validNumeric(this);" onkeypress="return disableEnterKey(event)" width="100px"/>
+                                    <input type="hidden" name="product_id" id="auction_product_id" value="<?php echo $product->getId() ?>">
+                                    <?php $imgSrc = $_helper->getBidButtonImage() ?>
+                                    <?php if ($imgSrc): ?>
+                                        <button class="image-button" id="auction_bid_button" type="button" onmouseover="overBidButton(this);" onmouseout="outBidButton(this);"  onclick="submitBid();" >
+                                            <img onmouseover="overBidButton(this);" onmouseout="outBidButton(this);" src="<?php echo $imgSrc; ?>" alt="<?php echo $this->__('Bid'); ?>" height="30px"/>
+                                        </button>
+                                    <?php else: ?>
+                                        <button class="button" id="auction_bid_button" type="button" onmouseover="overBidButton(this);" onmouseout="outBidButton(this);"  onclick="submitBid();" >
+                                            <span onmouseover="overBidButton(this);" onmouseout="outBidButton(this);"><?php echo $this->__('Bid') ?></span>
+                                        </button>
+                                    <?php endif; ?>
+                                    <span id="auction_bid_waitting" style="display:none;" class="opc-please-wait">
                                 <img src="<?php echo $this->getSkinUrl('images/opc-ajax-loader.gif') ?>" class="v-middle" alt="" />
-                            </span>	
-                        </div>
+                            </span>
+                                </div>
+                                <?php if (Mage::getStoreConfig('auction/general/enable_autobid') == 1): ?>
+                                    <div class="row type-option">
+                                        <input type="radio" name="bid_type" value="1" checked="checked" id="auction_standard_bid"/>
+                                        <label for="auction_standard_bid"><?php echo $this->__('Standard bid') ?></label>
+                                        <input type="radio" name="bid_type" value="0" id="auction_auto_bid"/>
+                                        <label for="auction_auto_bid"><?php echo $this->__('Autobid') ?></label>
+                                    </div>
+                                <?php else: ?>
+                                    <input hidden="hidden" type="radio" name="bid_type" value="1" checked="checked" id="auction_standard_bid"/>
+                                <?php endif; ?>
+                            <?php else:?>
+                                <div class="row">
+                                    <?php echo $this->__('You must pay deposit to participate auction (check out product deposit to by deposit)') ?>
+                                </div>
+                                <div class="row" style="height: 35px;">
+                                    <a class="button" id="auction_checkout_deposit_button" type="button" onmouseover="overDepositButton(this);" onmouseout="outDepositButton(this);"  href="<?php echo Mage::getBaseUrl().'auction/index/checkoutdeposit/id/'.$auction->getProductauctionId()?>" >
+                                        <span onmouseover="overDepositButton(this);" onmouseout="outDepositButton(this);"><?php echo $this->__('Buy deposit product') ?></span>
+                                    </a>
+                                </div>
+                            <?php endif;?>
                         <?php else:?>
                             <div class="row">
-                                <?php echo $this->__('You must pay deposit to participate auction (check out product deposit to by deposit)') ?>
-                            </div>
-                            <div class="row" style="height: 35px;">
-                                <a class="button" id="auction_checkout_deposit_button" type="button" onmouseover="overDepositButton(this);" onmouseout="outDepositButton(this);"  href="<?php echo Mage::getBaseUrl().'auction/index/checkoutdeposit/id/'.$auction->getProductauctionId()?>" >
-                                    <span onmouseover="overDepositButton(this);" onmouseout="outDepositButton(this);"><?php echo $this->__('Buy deposit product') ?></span>
-                                </a>
+                                <?php echo $this->__("You can't participate auction") ?>
                             </div>
                         <?php endif;?>
-                        <?php if (Mage::getStoreConfig('auction/general/enable_autobid') == 1): ?>
-                            <div class="row type-option">			
-                                <input type="radio" name="bid_type" value="1" checked="checked" id="auction_standard_bid"/>
-                                <label for="auction_standard_bid"><?php echo $this->__('Standard bid') ?></label>
-                                <input type="radio" name="bid_type" value="0" id="auction_auto_bid"/>
-                                <label for="auction_auto_bid"><?php echo $this->__('Autobid') ?></label>						
-                            </div>
-                        <?php else: ?>
-                            <input hidden="hidden" type="radio" name="bid_type" value="1" checked="checked" id="auction_standard_bid"/>
-                        <?php endif; ?>
+
+
                         <?php if (Mage::getSingleton('core/session')->getData('auction_error')): ?>
                             <div class="auction-error">
                                 <?php echo Mage::getSingleton('core/session')->getData('auction_error') ?>
@@ -309,7 +317,7 @@
                     </script>
                 </div>
             <?php else : ?>
-
+                <?php if($auction->getStatus() == 5):?>
                 <h4><?php echo $this->__('Completed Auction') ?></h4>
                 <?php if ($this->isWinner()): ?>
                     <div class="won-message">
@@ -327,16 +335,21 @@
                         }
                     </script>
                 <?php endif; ?>
-                <div class="auction-content">		
+                <div class="auction-content">
                     <div id="auction_info_<?php echo $auction->getId() ?>">
                         <?php echo $this->getChildHtml('auction_info') ?>
                     </div>	
                 </div>
-
-            <?php endif; ?>		
+                <?php else:?>
+                    <div class="auction-content">
+                        <div id="auction_info_<?php echo $auction->getId() ?>">
+                            <?php echo $this->getChildHtml('auction_info') ?>
+                        </div>
+                    </div>
+                <?php endif?>
+            <?php endif; ?>
         </div>
-        <?php endif; ?>
-        <style type="text/css">	
+        <style type="text/css">
         <?php echo Mage::getStoreConfig('auction/design/css') ?>
         </style>
     <?php endif; ?>

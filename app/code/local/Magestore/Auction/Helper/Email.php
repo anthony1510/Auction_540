@@ -14,8 +14,11 @@ class Magestore_Auction_Helper_Email extends Mage_Core_Helper_Abstract {
 			
 		$timestamp = Mage::getModel('core/date')->timestamp(time());
 		$end_time = strtotime($auction->getEndTime() . ' ' . $auction->getEndDate());
+		$start_time = strtotime($auction->getStartTime() . ' ' . $auction->getStartDate());
 		$day_close = Mage::getStoreConfig('auction/general/day_close');
-		$last_time= ($day_close - 1)*24*3600 + $end_time;	
+		$last_time= ($day_close - 1)*24*3600 + $start_time;
+        if($last_time<$end_time)
+            $last_time = $end_time;
 		if($last_time - $timestamp < 0){
 			$auction->noticeExpired();
 		}
