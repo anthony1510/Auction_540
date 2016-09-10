@@ -7,19 +7,49 @@ $auction = $this->getAuction();
 if ($auction->getStatus() == 3) {
     ?><?php if ($auction->getStatus() == 3) { //Not start?>
         <h4><?php echo $this->__('Auction Next') ?></h4>
-        <table class="auction_info" style="margin-bottom: 10px;">
+        <table class="auction_info">
 
             <tr class="row">
                 <td class="title"><?php echo $this->__('Start Time') ?>:</td>
                 <td class="value"><?php echo $this->formatDate(new Zend_Date($auction->getStartDate() . ' ' . $auction->getStartTime(), null, 'en_GB'), 'medium', true) ?></td>
             </tr>
-
+            <tr class="row">
+                <td class="title"><?php echo $this->__('Last date for auction') ?>:</td>
+                <td class="value"><?php echo $this->formatDate(new Zend_Date($auction->getLastDateForAuction(), null, 'en_GB'), 'medium', true) ?></td>
+            </tr>
         </table>
+        <div class="bid-box"  style="margin-bottom: 10px;">
+            <?php if($this->getAllowParticipateAuction($auction)):?>
+                <?php if($this->getStatusPayedDeposit()==2):?>
+                    <div class="row">
+                        <?php echo $this->__("You payed deposit and admin approved. When auction start, you can participate it") ?>
+                    </div>
+                <?php elseif($this->getStatusPayedDeposit()==1):?>
+                    <div class="row">
+                        <?php echo $this->__("You payed deposit and wait admin approve.") ?>
+                    </div>
+                <?php else:?>
+                    <div class="row">
+                        <?php echo $this->__('You must pay deposit ('). Mage::helper('core')->currency($auction->getDeposit()) .$this->__(') to participate auction (check out product deposit to by deposit)') ?>
+                    </div>
+                    <div class="row" style="height: 35px;">
+                        <a class="button" id="auction_checkout_deposit_button" type="button" onmouseover="overDepositButton(this);" onmouseout="outDepositButton(this);"  href="<?php echo Mage::getBaseUrl().'auction/index/checkoutdeposit/id/'.$auction->getProductauctionId()?>" >
+                            <span onmouseover="overDepositButton(this);" onmouseout="outDepositButton(this);"><?php echo $this->__('Buy deposit product') ?></span>
+                        </a>
+                    </div>
+                <?php endif;?>
+            <?php else:?>
+                <div class="row">
+                    <?php echo $this->__("You did't payed deposit and can't participate auction.") ?>
+                </div>
+            <?php endif;?>
+        </div>
         <?php
     }
     $auction = Mage::getModel('auction/productauction')->getCollection()
         ->addFieldToFilter('product_id', $auction->getProductId())
         ->addFieldToFilter('productauction_id', array("neq" => $auction->getId()))
+        ->addFieldToFilter('status',5)
         ->getLastItem();
     if($auction != null || isset($auction)) {
         ?>

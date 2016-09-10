@@ -41,7 +41,7 @@
                  
                     <?php $max_condition = $max_next_price ? ' ' . $this->__('to') . ' ' . Mage::helper('core')->currency($max_next_price) : '' ?>
                     <div class="bid-box">
-                        <?php if($this->getAllowBid($auction)):?>
+                        <?php if($this->getAllowParticipateAuction($auction)):?>
                             <?php if($this->getStatusPayedDeposit()==2 || $this->getStatusPayedDeposit()==1):?>
                                 <div class="row">
 

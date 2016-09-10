@@ -28,7 +28,7 @@ class Magestore_Auction_Block_Adminhtml_Productauction_Edit_Tabs extends Mage_Ad
             'content' => $this->getLayout()->createBlock('auction/adminhtml_productauction_edit_tab_form')->toHtml(),
         ));
 
-        if (!$auction || ($auction && ($auction->getStatus() >= 4 ))) { //start
+        if (!$auction || ($auction && ($auction->getStatus() >= 3 ))) { //start
             $this->addTab('form_deposit', array(
                 'label' => Mage::helper('auction')->__('Deposits'),
                 'title' => Mage::helper('auction')->__('Deposits'),

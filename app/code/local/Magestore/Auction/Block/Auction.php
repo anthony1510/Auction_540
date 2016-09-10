@@ -31,7 +31,7 @@ class Magestore_Auction_Block_Auction extends Mage_Core_Block_Template {
         return $this->getData('product');
     }
 
-    public function getAllowBid($auction){
+    public function getAllowParticipateAuction($auction){
         $customer = Mage::getSingleton('customer/session')->getCustomer();
         $collection = Mage::getModel('auction/deposit')->getCollection()
             ->addFieldToFilter('productauction_id',$auction->getId())
