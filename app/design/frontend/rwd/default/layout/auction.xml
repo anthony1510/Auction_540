@@ -83,7 +83,8 @@
         </reference>
     </auction_index_auctionlist>
 
-    <auction_index_autobidlist> <action method="setTempl"root">
+    <auction_index_autobidlist>
+        <reference name="root">
             <action method="setTemplate">
                 <template>page/2columns-left.phtml</template>
             </action>
